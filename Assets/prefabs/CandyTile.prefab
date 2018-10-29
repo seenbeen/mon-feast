@@ -35,7 +35,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1652964799410804}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5, y: 10, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -72,16 +72,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e4c65aab20ccf245ad7371c51e021dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetUnits: {x: 0, y: -1}
-  rowCol: {x: 0, y: 0}
-  mainRadius: 0.625
+  redSprite: {fileID: 21300000, guid: f724811b2bbc49644ae55bc1ab681511, type: 3}
+  greenSprite: {fileID: 21300000, guid: 60f5b544a851e054b8dfdbcb31f0f43d, type: 3}
+  blueSprite: {fileID: 21300000, guid: fdf01c074237b3444bbc1ae7ea21eca6, type: 3}
+  manager: {fileID: 0}
   colour: 0
-  debugRender: 1
-  mainMaterial: {fileID: 2100000, guid: 097a39a5f9c6a6e43a96a1164c0f28e5, type: 2}
-  outlineMaterial: {fileID: 2100000, guid: c9c4da378d3b17948a03b67630e45f5b, type: 2}
-  redColour: {r: 1, g: 0, b: 0, a: 1}
-  greenColour: {r: 0, g: 1, b: 0, a: 1}
-  blueColour: {r: 0, g: 0, b: 1, a: 1}
-  prev: {fileID: 0}
-  next: {fileID: 0}
   isDead: 0

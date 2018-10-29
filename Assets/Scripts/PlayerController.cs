@@ -115,7 +115,13 @@ public class PlayerController : MonoBehaviour {
             rb.velocity = new Vector2();
             return;
         }
+
         Vector2 cur_vel = rb.velocity;
+
+        if (cur_vel.y > 0)
+        {
+            has_slammed = false;
+        }
 
         if (Input.GetKey(KeyCode.LeftArrow))
         {
@@ -187,7 +193,6 @@ public class PlayerController : MonoBehaviour {
                             candyDestructor.DestructTile(col.collider.gameObject.GetComponent<CandyScript>(), destructivePower);
                         }
                     }
-                    has_slammed = false;
                     break;
                 }
         }

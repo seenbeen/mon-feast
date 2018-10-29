@@ -6,6 +6,10 @@ public class CandyScript : MonoBehaviour {
     // Structs and Enums
     public enum Colour { RED=0, GREEN, BLUE, NONE };
 
+    public Sprite redSprite = null;
+    public Sprite greenSprite = null;
+    public Sprite blueSprite = null;
+
     // Candy-Specific Information
     [HideInInspector]
     public CandyManager manager = null;
@@ -23,10 +27,39 @@ public class CandyScript : MonoBehaviour {
     // Component refs
     private Rigidbody2D rb = null;
 
+    // the object holding sprite for this candy
+    private GameObject sprite_child = null;
+
     // Use this for initialization
     void Start () {
         Debug.Assert(manager != null); // safety check... only manager should be creating Candies...
+        sprite_child = new GameObject{ name = "Sprite" };
+        SpriteRenderer s = sprite_child.AddComponent<SpriteRenderer>();
+        s.sprite = GetColourSprite(colour);
+
+        sprite_child.transform.localScale = new Vector3(0.48f, 0.48f, 1);
+        sprite_child.transform.position = transform.position + new Vector3(0, 0, -1);
+        sprite_child.transform.SetParent(transform, true);
+
         GetRB();
+    }
+
+    private Sprite GetColourSprite(CandyScript.Colour colour)
+    {
+        Sprite result = null;
+        switch (colour)
+        {
+            case CandyScript.Colour.RED:
+                result = redSprite;
+                break;
+            case CandyScript.Colour.GREEN:
+                result = greenSprite;
+                break;
+            case CandyScript.Colour.BLUE:
+                result = blueSprite;
+                break;
+        }
+        return result;
     }
 
     public void Freeze()
@@ -63,26 +96,5 @@ public class CandyScript : MonoBehaviour {
             rb = gameObject.GetComponent<Rigidbody2D>();
         }
         return rb;
-    }
-
-    public void Explosion()
-    {
-        List<CandyScript> r = manager.BFS(new List<CandyScript> { this }, c => c.colour == colour);
-        r.Add(this);
-        foreach (CandyScript c in r)
-        {
-            c.isDead = true;
-        }
-    }
-
-    private void OnMouseDown()
-    {
-        Color color = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
-        List<CandyScript> neighbours = manager.BFS(new List<CandyScript> { this }, c => c.colour == colour);
-        neighbours.Add(this);
-        foreach (CandyScript neighbour in neighbours)
-        {
-            neighbour.gameObject.GetComponent<MeshRenderer>().material.color = color;
-        }
     }
 }

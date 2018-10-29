@@ -25,9 +25,15 @@ public class FallingCandyScript : MonoBehaviour {
     public Color greenColour = new Color(0.2f, 1.0f, 0.2f);
     public Color blueColour = new Color(0.2f, 0.2f, 1.0f);
 
+    public Sprite redSprite = null;
+    public Sprite greenSprite = null;
+    public Sprite blueSprite = null;
+
+    private GameObject sprite_child = null;
+
     // Use this for initialization
     void Start () {
-        ppGen.numberOfSides = 6;
+        ppGen.numberOfSides = 12;
         ppGen.debugRender = this.debugRender;
         ppGen.mainRadius = this.mainRadius;
         ppGen.mainMaterial = new Material(this.mainMaterial)
@@ -41,6 +47,33 @@ public class FallingCandyScript : MonoBehaviour {
         rb = GetComponent<Rigidbody2D>();
         rb.velocity = fallVelocity;
         freeze_frame_vel = fallVelocity;
+
+        // actual sprite
+        sprite_child = new GameObject { name = "Sprite" };
+        SpriteRenderer s = sprite_child.AddComponent<SpriteRenderer>();
+        s.sprite = GetColourSprite(colour);
+
+        sprite_child.transform.localScale = new Vector3(0.2f, 0.2f, 1);
+        sprite_child.transform.position = transform.position + new Vector3(0, 0, -1);
+        sprite_child.transform.SetParent(transform, true);
+    }
+
+    private Sprite GetColourSprite(CandyScript.Colour colour)
+    {
+        Sprite result = null;
+        switch (colour)
+        {
+            case CandyScript.Colour.RED:
+                result = redSprite;
+                break;
+            case CandyScript.Colour.GREEN:
+                result = greenSprite;
+                break;
+            case CandyScript.Colour.BLUE:
+                result = blueSprite;
+                break;
+        }
+        return result;
     }
 
     public void Freeze()

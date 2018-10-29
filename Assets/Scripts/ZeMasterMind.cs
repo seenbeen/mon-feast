@@ -67,7 +67,7 @@ public class ZeMasterMind : MonoBehaviour {
                 tileGen.Freeze();
                 gameOver = true;
             }
-            mainCamera.backgroundColor = Color.Lerp(startColor, endColor, interp);
+            // mainCamera.backgroundColor = Color.Lerp(startColor, endColor, interp);
         }
     }
 }

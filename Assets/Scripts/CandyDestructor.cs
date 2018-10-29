@@ -3,18 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CandyDestructor : MonoBehaviour {
+    private enum State { IDLE, DESTROYING_CANDY, STABILIZING_CANDY }
+
     [SerializeField]
-    private PlayerController player = null;
+    PlayerController player = null;
+
     [SerializeField]
-    private CandyManager candyManager = null;
+    CandyManager candyManager = null;
+
     [SerializeField]
-    private FallingCandyGenerator candyGen = null;
+    FallingCandyGenerator candyGen = null;
 
     public float perChainBlockDestructionTime = 0.050f; // 50 mils by default
 
+    State state = State.IDLE;
     float destruct_timer = 0;
     int destruct_count = 0;
-    bool freezing = false;
+
     List<CandyScript> death_row = new List<CandyScript>();
     CandyScript.Colour death_colour;
 
@@ -25,66 +30,71 @@ public class CandyDestructor : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-        if (freezing)
+        switch (state)
         {
-            if (destruct_count == 0 || death_row.Count == 0)
-            {
-                if (destruct_timer <= 0)
+            case (State.IDLE):
                 {
-                    if (candyManager.SettleStep())
+                    break;
+                }
+            case (State.DESTROYING_CANDY):
+                {
+                    if (destruct_count == 0 || death_row.Count == 0)
                     {
+                        destruct_timer = 0;
+                        death_row.Clear();
+                        state = State.STABILIZING_CANDY;
+                        break;
+                    }
+
+                    if (destruct_timer <= 0)
+                    {
+                        --destruct_count;
+                        destruct_timer += perChainBlockDestructionTime;
+                        DestructNextTile();
+                    }
+                    destruct_timer -= Time.deltaTime;
+                    break;
+                }
+            case (State.STABILIZING_CANDY):
+                {
+                    if (destruct_timer <= 0)
+                    {
+                        if (!candyManager.SettleStep())
+                        {
+                            player.Unfreeze();
+                            candyManager.Unfreeze();
+                            candyGen.Unfreeze();
+                            state = State.IDLE;
+                            break;
+                        }
                         destruct_timer += perChainBlockDestructionTime;
                     }
-                    else
-                    {
-                        freezing = false;
-                        player.Unfreeze();
-                        candyManager.Unfreeze();
-                        candyGen.Unfreeze();
-                        death_row.Clear();
-                    }
+                    destruct_timer -= Time.deltaTime;
+                    break;
                 }
-                destruct_timer -= Time.deltaTime;
-            } else
-            {
-                if (destruct_timer <= 0)
-                {
-                    --destruct_count;
-                    destruct_timer += perChainBlockDestructionTime;
-                    DestructNextTile();
-                }
-                destruct_timer -= Time.deltaTime;
-            }
         }
 	}
     
     public void DestructTile(CandyScript script, int count)
     {
-        if (freezing)
+        switch (state)
         {
-            return;
+            case State.IDLE:
+                {
+                    destruct_count = count;
+                    destruct_timer = 0;
+                    death_colour = script.colour;
+                    death_row.Add(script);
+
+                    player.Freeze();
+                    candyManager.Freeze();
+                    candyGen.Freeze();
+                    state = State.DESTROYING_CANDY;
+                    break;
+                }
         }
-        destruct_count = count;
-        destruct_timer = 0;
-        freezing = true;
-        death_colour = script.colour;
-        death_row.Add(script);
-        player.Freeze();
-        candyManager.Freeze();
-        candyGen.Freeze();
     }
 
-    // does a safety check before enqueueing the script to ensure the script doesn't already exist
-    void SafeEnqueue(CandyScript script)
-    {
-        if (death_row.Contains(script))
-        {
-            Debug.Log("Warning: Double enqueue.");
-            return;
-        }
-        death_row.Add(script);
-    }
-    
     void DestructNextTile()
     {
         foreach (CandyScript c in death_row)
