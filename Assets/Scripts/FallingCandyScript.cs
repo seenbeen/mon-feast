@@ -52,8 +52,8 @@ public class FallingCandyScript : MonoBehaviour {
         sprite_child = new GameObject { name = "Sprite" };
         SpriteRenderer s = sprite_child.AddComponent<SpriteRenderer>();
         s.sprite = GetColourSprite(colour);
+        s.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
 
-        sprite_child.transform.localScale = new Vector3(0.2f, 0.2f, 1);
         sprite_child.transform.position = transform.position + new Vector3(0, 0, -1);
         sprite_child.transform.SetParent(transform, true);
     }

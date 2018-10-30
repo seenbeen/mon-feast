@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
+    private enum State { IDLE, SLAMMING }
+    
     [SerializeField]
     private CandyDestructor candyDestructor = null;
 
@@ -34,6 +36,9 @@ public class PlayerController : MonoBehaviour {
     private float destructive_counter;
 
     private bool has_slammed = false;
+    private bool power_slam = false;
+
+    private PlayerAnimationController pac = null;
 
     // Use this for initialization
 	void Start () {
@@ -45,13 +50,14 @@ public class PlayerController : MonoBehaviour {
             color = GetDebugColour(this.colour)
         };
         ppGen.outlineMaterial = this.outlineMaterial;
-        ppGen.generateCollider = true;
+        ppGen.generateCollider = false;
         ppGen.colliderIsTrigger = false;
         ppGen.Generate(gameObject);
 
         rb = GetComponent<Rigidbody2D>();
 
         destructive_counter = destructivePowerLog;
+        pac = GetComponent<PlayerAnimationController>();
     }
 
     Color GetDebugColour(CandyScript.Colour colour)
@@ -64,6 +70,7 @@ public class PlayerController : MonoBehaviour {
                 break;
             case CandyScript.Colour.GREEN:
                 col = greenColour;
+
                 break;
             case CandyScript.Colour.BLUE:
                 col = blueColour;
@@ -77,6 +84,7 @@ public class PlayerController : MonoBehaviour {
     void SetColour(CandyScript.Colour colour)
     {
         this.colour = colour;
+        pac.EatCandy(((int) this.colour) + 1);
         if (this.debugRender)
         {
             ppGen.mainMaterial.color = GetDebugColour(colour);
@@ -121,6 +129,7 @@ public class PlayerController : MonoBehaviour {
         if (cur_vel.y > 0)
         {
             has_slammed = false;
+            pac.Slam(false);
         }
 
         if (Input.GetKey(KeyCode.LeftArrow))
@@ -139,8 +148,14 @@ public class PlayerController : MonoBehaviour {
             SetColour((CandyScript.Colour)(((int)colour + 1) % 3));
         }
 
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            power_slam = !power_slam;
+        }
+
         if (Input.GetKeyDown(KeyCode.DownArrow) && !has_slammed)
         {
+            pac.Slam(true);
             has_slammed = true;
             cur_vel.y = -deflectYVel;
             cur_vel.x = 0;
@@ -152,12 +167,39 @@ public class PlayerController : MonoBehaviour {
         last_frame_vel = rb.velocity;
     }
 
+    void HandleCandyBlockCollision(Collision2D col)
+    {
+        // no bouncing back n forth
+        if (Mathf.Abs(Vector3.Dot(col.GetContact(0).normal, new Vector3(1, 0))) > 0.99f)
+        {
+            rb.velocity = Vector3.Reflect(last_frame_vel, col.contacts[0].normal);
+        }
+        else
+        {
+            rb.velocity = col.GetContact(0).normal * deflectYVel;
+            if (has_slammed)
+            {
+                bool will_destroy = colour == col.collider.gameObject.GetComponent<CandyScript>().colour;
+                if (will_destroy)
+                {
+                    int destructivePower = Mathf.FloorToInt(Mathf.Log(destructive_counter, destructivePowerLog));
+                    candyDestructor.DestructTile(col.collider.gameObject.GetComponent<CandyScript>(), destructivePower, power_slam);
+                }
+            }
+        }
+    }
+
     void OnCollisionStay2D(Collision2D col)
     {
         switch (col.collider.tag) {
+            case "Boundary-Floor":
+                {
+                    rb.velocity = new Vector2(0,1) * deflectYVel;
+                    break;
+                }
             case "Candy-Block":
                 {
-                    rb.velocity = col.contacts[0].normal * deflectYVel;
+                    HandleCandyBlockCollision(col);
                     break;
                 }
         }
@@ -170,7 +212,7 @@ public class PlayerController : MonoBehaviour {
             case "Boundary-Floor":
                 {
                     Vector2 cur_vel = last_frame_vel;
-                    cur_vel.y = Mathf.Sign(cur_vel.y) * -deflectYVel;
+                    cur_vel.y = deflectYVel;
                     rb.velocity = cur_vel;
                     break;
                 }
@@ -183,16 +225,7 @@ public class PlayerController : MonoBehaviour {
                 }
             case "Candy-Block":
                 {
-                    rb.velocity = col.contacts[0].normal * deflectYVel;
-                    if (has_slammed)
-                    {
-                        bool will_destroy = colour == col.collider.gameObject.GetComponent<CandyScript>().colour;
-                        if (will_destroy)
-                        {
-                            int destructivePower = Mathf.FloorToInt(Mathf.Log(destructive_counter, destructivePowerLog));
-                            candyDestructor.DestructTile(col.collider.gameObject.GetComponent<CandyScript>(), destructivePower);
-                        }
-                    }
+                    HandleCandyBlockCollision(col);
                     break;
                 }
         }

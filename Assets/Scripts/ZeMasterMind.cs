@@ -12,12 +12,6 @@ public class ZeMasterMind : MonoBehaviour {
     private CandyManager tileGen = null;
     [SerializeField]
     private FallingCandyGenerator candyGen = null;
-    [SerializeField]
-    private Camera mainCamera = null;
-    [SerializeField]
-    private Color startColor = new Color(49.0f / 255, 77.0f / 255, 121.0f / 255);
-    [SerializeField]
-    private Color endColor = new Color(1.0f, 0, 0);
 
     [SerializeField]
     private float deathHeight = 10.0f;
@@ -59,7 +53,6 @@ public class ZeMasterMind : MonoBehaviour {
             tileGen.SetRisePeriod(Mathf.Max(startingRisePeriod + rise_period_scalar * duration, endingRisePeriod));
             candyGen.generationInterval = Mathf.Max(startingFallingGeneratorInterval + falling_candy_scalar * duration, endingFallingGeneratorInterval);
             // tint screen
-            float interp = Mathf.Log(Mathf.Max(1, Mathf.Exp(1) * Mathf.Min(tileGen.GetHighestHeight() / deathHeight, 0.9f)));
             if (tileGen.GetHighestHeight() >= deathHeight)
             {
                 player.Freeze();
@@ -67,7 +60,6 @@ public class ZeMasterMind : MonoBehaviour {
                 tileGen.Freeze();
                 gameOver = true;
             }
-            // mainCamera.backgroundColor = Color.Lerp(startColor, endColor, interp);
         }
     }
 }

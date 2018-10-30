@@ -36,8 +36,7 @@ public class CandyScript : MonoBehaviour {
         sprite_child = new GameObject{ name = "Sprite" };
         SpriteRenderer s = sprite_child.AddComponent<SpriteRenderer>();
         s.sprite = GetColourSprite(colour);
-
-        sprite_child.transform.localScale = new Vector3(0.48f, 0.48f, 1);
+        s.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
         sprite_child.transform.position = transform.position + new Vector3(0, 0, -1);
         sprite_child.transform.SetParent(transform, true);
 

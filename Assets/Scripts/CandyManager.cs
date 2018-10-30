@@ -525,15 +525,15 @@ public class CandyManager : MonoBehaviour {
         return new KeyValuePair<Vector2Int, Vector2Int>( new Vector2Int(-1, -1), new Vector2Int(-1, -1) );
     }
 
-    // returns false if the system is considered "stable"
-    // on the other hand, if settling is necessary, returns true
-    // after making one move towards a stable state
-    public bool SettleStep()
+    // returns null if the system is considered "stable"
+    // on the other hand, if settling is necessary, returns the 
+    // offending script after making one move towards a stable state
+    public CandyScript SettleStep()
     {
         KeyValuePair<Vector2Int, Vector2Int> move = FindStablizingMove();
         if (move.Key.x == -1)
         {
-            return false;
+            return null;
         }
 
         candy_grid[move.Value.x][move.Value.y] = candy_grid[move.Key.x][move.Key.y];
@@ -549,6 +549,6 @@ public class CandyManager : MonoBehaviour {
         id.row = move.Value.x;
         id.column = move.Value.y;
         
-        return true;
+        return script;
     }
 }
