@@ -4,21 +4,22 @@ using UnityEngine;
 
 public class CandyScript : MonoBehaviour {
     // Structs and Enums
-    public enum Colour { RED=0, GREEN, BLUE, NONE };
-
-    public Sprite redSprite = null;
-    public Sprite greenSprite = null;
-    public Sprite blueSprite = null;
-
+    public enum Colour { RED = 0, GREEN, BLUE, WHITE };
+    public enum State { IDLE = 0, GLOW, EXPLODE };
+    
     // Candy-Specific Information
     [HideInInspector]
     public CandyManager manager = null;
+    [SerializeField]
+    private GameObject ghostCandyPrefab = null;
 
     [HideInInspector]
-    public Colour colour = Colour.NONE;
+    public Colour colour = Colour.BLUE;
 
     [HideInInspector]
     public bool isDead = false;
+
+    private State state = State.IDLE;
 
     // Pause-Related Fields
     private Vector2 freeze_frame_vel;
@@ -26,39 +27,32 @@ public class CandyScript : MonoBehaviour {
 
     // Component refs
     private Rigidbody2D rb = null;
-
-    // the object holding sprite for this candy
-    private GameObject sprite_child = null;
-
+    private Animator an = null;
+    
     // Use this for initialization
     void Start () {
         Debug.Assert(manager != null); // safety check... only manager should be creating Candies...
-        sprite_child = new GameObject{ name = "Sprite" };
-        SpriteRenderer s = sprite_child.AddComponent<SpriteRenderer>();
-        s.sprite = GetColourSprite(colour);
-        s.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-        sprite_child.transform.position = transform.position + new Vector3(0, 0, -1);
-        sprite_child.transform.SetParent(transform, true);
-
         GetRB();
+        an = GetComponent<Animator>();
+        an.Play(Animator.StringToHash("Red_Idle"));
+        an.SetInteger("Colour", (int)colour);
     }
 
-    private Sprite GetColourSprite(CandyScript.Colour colour)
+    public bool IsAnimComplete()
     {
-        Sprite result = null;
-        switch (colour)
-        {
-            case CandyScript.Colour.RED:
-                result = redSprite;
-                break;
-            case CandyScript.Colour.GREEN:
-                result = greenSprite;
-                break;
-            case CandyScript.Colour.BLUE:
-                result = blueSprite;
-                break;
-        }
-        return result;
+        return an.GetBool("StartedAnimation") && an.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f;
+    }
+
+    public void SetState(State state)
+    {
+        this.state = state;
+        an.SetInteger("State", (int)state);
+        an.SetBool("StartedAnimation", false);
+    }
+
+    public State GetState()
+    {
+        return this.state;
     }
 
     public void Freeze()
@@ -95,5 +89,12 @@ public class CandyScript : MonoBehaviour {
             rb = gameObject.GetComponent<Rigidbody2D>();
         }
         return rb;
+    }
+    
+    public void SpawnGhost()
+    {
+        GameObject ghost = Instantiate(ghostCandyPrefab);
+        ghost.transform.position = transform.position;
+        ghost.GetComponent<GhostCandyScript>().colour = colour;
     }
 }

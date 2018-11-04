@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/main.unity
     guid: 04cfa9808c3aba24ea0b97a74736ee49
+  - enabled: 1
+    path: Assets/Scenes/menu-no-splash.unity
+    guid: 088fd419bf81d554fbd07c3e394f8e25
   m_configObjects: {}

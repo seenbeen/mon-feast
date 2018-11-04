@@ -7,9 +7,15 @@ public class ZeMasterMind : MonoBehaviour {
     // The master mind game-master which controls how difficult things are
     // at any given point in time and also referees the game
     [SerializeField]
+    private GameObject pausePanel = null;
+
+    [SerializeField]
+    private GameObject gameOverPanel = null;
+    
+    [SerializeField]
     private PlayerController player = null;
     [SerializeField]
-    private CandyManager tileGen = null;
+    private CandyManager candyManager = null;
     [SerializeField]
     private FallingCandyGenerator candyGen = null;
 
@@ -31,6 +37,7 @@ public class ZeMasterMind : MonoBehaviour {
     [SerializeField]
     private float endingFallingGeneratorInterval = 0.25f;
 
+    private bool isCurrentlyPaused = false;
 
     private float duration = 0.0f;
     private float difficulty_scalar, rise_period_scalar, falling_candy_scalar;
@@ -41,25 +48,47 @@ public class ZeMasterMind : MonoBehaviour {
         falling_candy_scalar = (endingFallingGeneratorInterval - startingFallingGeneratorInterval) / expectedDurationSeconds;
     }
 
-    // a hack
-    private bool gameOver = false;
-
 	void Update () {
-        if (!gameOver)
+        if (!isCurrentlyPaused)
         {
 
             duration += Time.deltaTime;
-            tileGen.chainLengthProbabilityDecay = Mathf.Max(startingPConstant + difficulty_scalar * duration, expectedFinalPConstant);
-            tileGen.SetRisePeriod(Mathf.Max(startingRisePeriod + rise_period_scalar * duration, endingRisePeriod));
+            candyManager.chainLengthProbabilityDecay = Mathf.Max(startingPConstant + difficulty_scalar * duration, expectedFinalPConstant);
+            candyManager.SetRisePeriod(Mathf.Max(startingRisePeriod + rise_period_scalar * duration, endingRisePeriod));
             candyGen.generationInterval = Mathf.Max(startingFallingGeneratorInterval + falling_candy_scalar * duration, endingFallingGeneratorInterval);
             // tint screen
-            if (tileGen.GetHighestHeight() >= deathHeight)
+            if (candyManager.GetHighestHeight() >= deathHeight)
             {
-                player.Freeze();
-                candyGen.Freeze();
-                tileGen.Freeze();
-                gameOver = true;
+                SetGamePaused(true);
+                gameOverPanel.SetActive(true);
             }
+        }
+    }
+
+    public void SetGamePaused(bool isPaused)
+    {
+        if (isCurrentlyPaused == isPaused)
+        {
+            return;
+        }
+
+        isCurrentlyPaused = isPaused;
+        
+        if (isCurrentlyPaused)
+        {
+            Time.timeScale = 0;
+        } else
+        {
+            Time.timeScale = 1;
+        }
+    }
+
+    void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+        {
+            pausePanel.SetActive(true);
+            SetGamePaused(true);
         }
     }
 }

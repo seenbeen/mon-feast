@@ -29,9 +29,13 @@ public class PlayerAnimationController : MonoBehaviour {
         has_slammed = slamming;
     }
 
-    public void EatCandy(int col)
+    public void EatCandy()
     {
         eatAnimTimer = eatAnimTime;
+    }
+
+    public void SetColour(int col)
+    {
         colour = col;
     }
 }

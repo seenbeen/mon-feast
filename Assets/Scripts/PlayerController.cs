@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
-    private enum State { IDLE, SLAMMING }
-    
+    private enum SlamState { NOT_SLAMMING, SLAMMING, SUPER_SLAMMING }
     [SerializeField]
     private CandyDestructor candyDestructor = null;
 
@@ -14,45 +13,24 @@ public class PlayerController : MonoBehaviour {
     public float maxVely = 5.0f;
     public float accel = 4.0f;
     public float gAccel = 1.0f;
-    public float deflectYVel = 10.0f;
-    public float radius = 0.5f;
+    public float max_height = 9.0f;
+    public float slam_vel = 10.0f;
 
     public CandyScript.Colour colour = CandyScript.Colour.BLUE;
-
-    public bool debugRender = true;
-    public Material mainMaterial = null;
-    public Material outlineMaterial = null;
-
-    public Color redColour = new Color(1.0f, 0.0f, 0.0f);
-    public Color greenColour = new Color(0.0f, 1.0f, 0.0f);
-    public Color blueColour = new Color(0.0f, 0.0f, 1.0f);
 
     private Rigidbody2D rb;
     private Vector2 last_frame_vel;
     private Vector2 freeze_frame_vel;
     private bool currently_frozen = false;
-    private PolyPieceGenerator ppGen = new PolyPieceGenerator();
 
     private float destructive_counter;
 
-    private bool has_slammed = false;
-    private bool power_slam = false;
+    private SlamState slam_state = SlamState.NOT_SLAMMING;
 
     private PlayerAnimationController pac = null;
 
     // Use this for initialization
 	void Start () {
-        ppGen.numberOfSides = 12;
-        ppGen.debugRender = this.debugRender;
-        ppGen.mainRadius = this.radius;
-        ppGen.mainMaterial = new Material(this.mainMaterial)
-        {
-            color = GetDebugColour(this.colour)
-        };
-        ppGen.outlineMaterial = this.outlineMaterial;
-        ppGen.generateCollider = false;
-        ppGen.colliderIsTrigger = false;
-        ppGen.Generate(gameObject);
 
         rb = GetComponent<Rigidbody2D>();
 
@@ -60,35 +38,10 @@ public class PlayerController : MonoBehaviour {
         pac = GetComponent<PlayerAnimationController>();
     }
 
-    Color GetDebugColour(CandyScript.Colour colour)
-    {
-        Color col = new Color();
-        switch (colour)
-        {
-            case CandyScript.Colour.RED:
-                col = redColour;
-                break;
-            case CandyScript.Colour.GREEN:
-                col = greenColour;
-
-                break;
-            case CandyScript.Colour.BLUE:
-                col = blueColour;
-                break;
-            default:
-                break;
-        }
-        return col;
-    }
-
     void SetColour(CandyScript.Colour colour)
     {
         this.colour = colour;
-        pac.EatCandy(((int) this.colour) + 1);
-        if (this.debugRender)
-        {
-            ppGen.mainMaterial.color = GetDebugColour(colour);
-        }
+        pac.SetColour((int)this.colour + 1);
     }
 
     public void Freeze()
@@ -128,7 +81,7 @@ public class PlayerController : MonoBehaviour {
 
         if (cur_vel.y > 0)
         {
-            has_slammed = false;
+            slam_state = SlamState.NOT_SLAMMING;
             pac.Slam(false);
         }
 
@@ -148,18 +101,22 @@ public class PlayerController : MonoBehaviour {
             SetColour((CandyScript.Colour)(((int)colour + 1) % 3));
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            power_slam = !power_slam;
-        }
-
-        if (Input.GetKeyDown(KeyCode.DownArrow) && !has_slammed)
+        if (Input.GetKeyDown(KeyCode.DownArrow) && slam_state == SlamState.NOT_SLAMMING)
         {
             pac.Slam(true);
-            has_slammed = true;
-            cur_vel.y = -deflectYVel;
+            slam_state = SlamState.SLAMMING;
+            cur_vel.y = -slam_vel;
+            cur_vel.x = 0;
+        } else if (Input.GetKeyDown(KeyCode.UpArrow) && slam_state == SlamState.NOT_SLAMMING)
+        {
+            pac.Slam(true);
+            pac.SetColour((int)CandyScript.Colour.WHITE + 1);
+            slam_state = SlamState.SUPER_SLAMMING;
+            cur_vel.y = -slam_vel * 2;
             cur_vel.x = 0;
         }
+
+
         cur_vel.y -= gAccel * Time.deltaTime;
         cur_vel.y = Mathf.Clamp(cur_vel.y, -maxVely, maxVely);
         rb.velocity = cur_vel;
@@ -170,20 +127,22 @@ public class PlayerController : MonoBehaviour {
     void HandleCandyBlockCollision(Collision2D col)
     {
         // no bouncing back n forth
-        if (Mathf.Abs(Vector3.Dot(col.GetContact(0).normal, new Vector3(1, 0))) > 0.99f)
+        if (Mathf.Abs(Vector3.Dot(col.GetContact(0).normal, new Vector3(1, 0))) > 0.8391f)
         {
             rb.velocity = Vector3.Reflect(last_frame_vel, col.contacts[0].normal);
         }
         else
         {
-            rb.velocity = col.GetContact(0).normal * deflectYVel;
-            if (has_slammed)
+            rb.velocity = RestrictVelocityToCeilingHeight(col.GetContact(0).normal);
+            if (slam_state != SlamState.NOT_SLAMMING)
             {
-                bool will_destroy = colour == col.collider.gameObject.GetComponent<CandyScript>().colour;
+                bool is_super_slam = slam_state == SlamState.SUPER_SLAMMING;
+                bool will_destroy = colour == col.collider.gameObject.GetComponent<CandyScript>().colour || is_super_slam;
                 if (will_destroy)
                 {
-                    int destructivePower = Mathf.FloorToInt(Mathf.Log(destructive_counter, destructivePowerLog));
-                    candyDestructor.DestructTile(col.collider.gameObject.GetComponent<CandyScript>(), destructivePower, power_slam);
+                    SetColour(colour);
+                    int INF = 1000; // 10 * 10 = 100; 1000 is more than safe to be considered inf
+                    candyDestructor.DestructTile(col.collider.gameObject.GetComponent<CandyScript>(), INF, is_super_slam);
                 }
             }
         }
@@ -194,7 +153,7 @@ public class PlayerController : MonoBehaviour {
         switch (col.collider.tag) {
             case "Boundary-Floor":
                 {
-                    rb.velocity = new Vector2(0,1) * deflectYVel;
+                    rb.velocity = RestrictVelocityToCeilingHeight(new Vector2(0,1));
                     break;
                 }
             case "Candy-Block":
@@ -212,8 +171,8 @@ public class PlayerController : MonoBehaviour {
             case "Boundary-Floor":
                 {
                     Vector2 cur_vel = last_frame_vel;
-                    cur_vel.y = deflectYVel;
-                    rb.velocity = cur_vel;
+                    cur_vel.y = 1;
+                    rb.velocity = RestrictVelocityToCeilingHeight(cur_vel);
                     break;
                 }
             case "Boundary-Wall":
@@ -237,11 +196,34 @@ public class PlayerController : MonoBehaviour {
         {
             case "Good-Candy":
                 {
+                    pac.EatCandy();
                     SetColour(col.gameObject.GetComponent<FallingCandyScript>().colour);
                     col.GetComponent<FallingCandyScript>().isDead = true;
                     ++destructive_counter;
                     break;
                 }
         }
+    }
+
+    Vector2 RestrictVelocityToCeilingHeight(Vector2 vel)
+    {
+        // h = v_0 * t + 1/2 * a * t ^ 2
+        // (max_height - my_height) = h_max
+        // 0 = v_0 + a * t
+        // t_max = -v_0 / a
+        // h_max = v_0 * t_max + 1/2 * a * t_max ^ 2
+        // h_max = v_0 * -v_0 / a + 1/2 * a * v_0 ^ 2 / a ^ 2
+        // h_max = v_0 ^ 2 * (-1 / a + 1/2 * 1 / a)
+        // h_max = v_0 ^ 2 * (-1 / ( 2 * a))
+        // v_0 = sqrt(h_max * -2 * a)
+        // y_v = v_0
+        // ny/nx = M
+        // y_v / x_v = M
+        // x_v = y_v / M
+        // x_v = y_v * nx / ny
+        float h_max = max_height - transform.position.y;
+        float y_v = Mathf.Sqrt(h_max * 2 * gAccel);
+        float x_v = y_v * vel.x / vel.y;
+        return new Vector2(x_v, y_v);
     }
 }

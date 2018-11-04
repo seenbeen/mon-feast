@@ -21,6 +21,9 @@ GameObject:
   - component: {fileID: 4255608801798104}
   - component: {fileID: 114845429488851260}
   - component: {fileID: 50795063950369484}
+  - component: {fileID: 58262621640655266}
+  - component: {fileID: 95584625840823736}
+  - component: {fileID: 212057733587853122}
   m_Layer: 0
   m_Name: FallingCandy
   m_TagString: Good-Candy
@@ -35,8 +38,8 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1137682221951858}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5, y: 7, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -60,7 +63,40 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 4
+  m_Constraints: 0
+--- !u!58 &58262621640655266
+CircleCollider2D:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1137682221951858}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 0.5
+--- !u!95 &95584625840823736
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1137682221951858}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: f9c0fd4bd072c88468b65ec4677a510b, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!114 &114845429488851260
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -73,15 +109,52 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fallVelocity: {x: 0, y: -0.5}
+  degreesPerSecond: 360
   colour: 0
   isDead: 0
-  mainRadius: 0.25
-  debugRender: 0
-  mainMaterial: {fileID: 2100000, guid: f72b6be7fa121cb4fa2377bef32f1399, type: 2}
-  outlineMaterial: {fileID: 2100000, guid: c9c4da378d3b17948a03b67630e45f5b, type: 2}
-  redColour: {r: 1, g: 0.2, b: 0.2, a: 1}
-  greenColour: {r: 0.2, g: 1, b: 0.2, a: 1}
-  blueColour: {r: 0.2, g: 0.2, b: 1, a: 1}
-  redSprite: {fileID: 21300000, guid: a8759b8f71b5e93428b9de1c4350bffe, type: 3}
-  greenSprite: {fileID: 21300000, guid: 23a4506ac484e834ba5d6fb519d2237b, type: 3}
-  blueSprite: {fileID: 21300000, guid: 22b98ff07a67a364ba506f30ea2ca548, type: 3}
+--- !u!212 &212057733587853122
+SpriteRenderer:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1137682221951858}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
+  m_Materials:
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 1067489043
+  m_SortingLayer: -6
+  m_SortingOrder: 1
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 0.24, y: 0.256}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 0
+  m_MaskInteraction: 1
+  m_SpriteSortPoint: 0

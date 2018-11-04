@@ -36,14 +36,6 @@ public class CandyManager : MonoBehaviour {
     private PolyPieceGenerator ppGen = new PolyPieceGenerator();
     public float mainRadius = 1.0f;
 
-    public bool debugRender = true;
-    public Material mainMaterial;
-    public Material outlineMaterial = null;
-
-    public Color redColour = new Color(1.0f, 0.0f, 0.0f);
-    public Color greenColour = new Color(0.0f, 1.0f, 0.0f);
-    public Color blueColour = new Color(0.0f, 0.0f, 1.0f);
-
     private float new_rise_period;
 
 
@@ -70,9 +62,8 @@ public class CandyManager : MonoBehaviour {
     // Use this for initialization
     void Start() {
         ppGen.numberOfSides = 6;
-        ppGen.debugRender = this.debugRender;
+        ppGen.debugRender = false;
         ppGen.mainRadius = this.mainRadius;
-        ppGen.outlineMaterial = this.outlineMaterial;
         ppGen.generateCollider = true;
         ppGen.colliderIsTrigger = false;
 
@@ -82,26 +73,6 @@ public class CandyManager : MonoBehaviour {
         {
             GenerateRow(j);
         }
-    }
-
-    private Color GetDebugColour(CandyScript.Colour colour)
-    {
-        Color col = new Color();
-        switch (colour)
-        {
-            case CandyScript.Colour.RED:
-                col = redColour;
-                break;
-            case CandyScript.Colour.GREEN:
-                col = greenColour;
-                break;
-            case CandyScript.Colour.BLUE:
-                col = blueColour;
-                break;
-            default:
-                break;
-        }
-        return col;
     }
 
     public CandyScript.Colour GenerateSpawnColour()
@@ -157,13 +128,15 @@ public class CandyManager : MonoBehaviour {
 
     public float GetHighestHeight()
     {
+        float vStack = PolyPieceGenerator.CalculateVStackDistance(6, mainRadius);
+        float aRad = PolyPieceGenerator.CalculateActualRadius(6, mainRadius);
         foreach (List<CandyScript> l in candy_grid)
         {
             foreach (CandyScript c in l)
             {
                 if (c != null)
                 {
-                    return c.gameObject.transform.position.y;
+                    return (c.gameObject.transform.position.y + aRad) / vStack;
                 }
             }
         }
@@ -259,6 +232,7 @@ public class CandyManager : MonoBehaviour {
             {
                 if (candy_grid[i][j] != null && candy_grid[i][j].isDead)
                 {
+                    candy_grid[i][j].SpawnGhost();
                     candy_indexer.Remove(candy_grid[i][j]);
                     Destroy(candy_grid[i][j].gameObject);
                     candy_grid[i][j] = null;
@@ -295,11 +269,6 @@ public class CandyManager : MonoBehaviour {
 
             List<CandyScript> neighbours = FetchNeighbours(script);
             script.colour = GenerateColour(script, neighbours);
-
-            ppGen.mainMaterial = new Material(this.mainMaterial)
-            {
-                color = GetDebugColour(script.colour)
-            };
             ppGen.Generate(candy);
         }
         next_row_parity = (1 + next_row_parity) % 2;

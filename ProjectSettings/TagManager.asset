@@ -47,6 +47,24 @@ TagManager:
   - name: Background
     uniqueID: 3167599875
     locked: 0
+  - name: Candy
+    uniqueID: 1067489043
+    locked: 0
+  - name: Candy-Glowing
+    uniqueID: 1253461459
+    locked: 0
+  - name: Player
+    uniqueID: 2760366981
+    locked: 0
+  - name: Candy-Exploding
+    uniqueID: 1715329497
+    locked: 0
+  - name: Border
+    uniqueID: 116157985
+    locked: 0
+  - name: UI
+    uniqueID: 3722053399
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
