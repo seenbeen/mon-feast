@@ -6,8 +6,8 @@ public class PlayerController : MonoBehaviour {
     private enum SlamState { NOT_SLAMMING, SLAMMING, SUPER_SLAMMING }
     [SerializeField]
     private CandyDestructor candyDestructor = null;
-
-    public float destructivePowerLog = 2;
+    [SerializeField]
+    private GameObject ghostPlayerPrefab = null;
 
     public float maxVelx = 5.0f;
     public float maxVely = 5.0f;
@@ -23,8 +23,6 @@ public class PlayerController : MonoBehaviour {
     private Vector2 freeze_frame_vel;
     private bool currently_frozen = false;
 
-    private float destructive_counter;
-
     private SlamState slam_state = SlamState.NOT_SLAMMING;
 
     private PlayerAnimationController pac = null;
@@ -33,8 +31,6 @@ public class PlayerController : MonoBehaviour {
 	void Start () {
 
         rb = GetComponent<Rigidbody2D>();
-
-        destructive_counter = destructivePowerLog;
         pac = GetComponent<PlayerAnimationController>();
     }
 
@@ -76,7 +72,12 @@ public class PlayerController : MonoBehaviour {
             rb.velocity = new Vector2();
             return;
         }
-
+        /* // TODO: get the angle stuff working ;_;
+        float ang = ((Mathf.Atan2(1.5f, rb.velocity.x / maxVelx) * Mathf.Rad2Deg) % 360 + 360) % 360 + 90;
+        Debug.Log(ang);
+        
+        transform.rotation = Quaternion.AngleAxis(180 - ang, new Vector3(0,0,1));
+        */
         Vector2 cur_vel = rb.velocity;
 
         if (cur_vel.y > 0)
@@ -137,6 +138,12 @@ public class PlayerController : MonoBehaviour {
             if (slam_state != SlamState.NOT_SLAMMING)
             {
                 bool is_super_slam = slam_state == SlamState.SUPER_SLAMMING;
+                if (is_super_slam)
+                {
+                    GameObject ghost = Instantiate(ghostPlayerPrefab);
+                    ghost.transform.position = transform.position;
+                    slam_state = SlamState.SLAMMING; // prevent multiple flashy animations from happening
+                }
                 bool will_destroy = colour == col.collider.gameObject.GetComponent<CandyScript>().colour || is_super_slam;
                 if (will_destroy)
                 {
@@ -173,6 +180,11 @@ public class PlayerController : MonoBehaviour {
                     Vector2 cur_vel = last_frame_vel;
                     cur_vel.y = 1;
                     rb.velocity = RestrictVelocityToCeilingHeight(cur_vel);
+                    if (slam_state == SlamState.SUPER_SLAMMING)
+                    {
+                        GameObject ghost = Instantiate(ghostPlayerPrefab);
+                        ghost.transform.position = transform.position;
+                    }
                     break;
                 }
             case "Boundary-Wall":
@@ -199,7 +211,6 @@ public class PlayerController : MonoBehaviour {
                     pac.EatCandy();
                     SetColour(col.gameObject.GetComponent<FallingCandyScript>().colour);
                     col.GetComponent<FallingCandyScript>().isDead = true;
-                    ++destructive_counter;
                     break;
                 }
         }
@@ -225,5 +236,10 @@ public class PlayerController : MonoBehaviour {
         float y_v = Mathf.Sqrt(h_max * 2 * gAccel);
         float x_v = y_v * vel.x / vel.y;
         return new Vector2(x_v, y_v);
+    }
+
+    public bool IsFrozen()
+    {
+        return currently_frozen;
     }
 }

@@ -146,11 +146,11 @@ conf = ShatteredSprite.Config()
 conf.seed = "EXPLOOSIONNN!"
 conf.image = image.load("Green Candy.png")
 conf.image = transform.scale(conf.image, (conf.image.get_width(), conf.image.get_height()))
-conf.explode_scale = 2.0
+conf.explode_scale = 3.0
 conf.r_spread_min = 0.1
 conf.r_spread_max = 0.2
-conf.wait_time = 0
-conf.explode_time = 1
+conf.wait_time = 1
+conf.explode_time = 2
 conf.explode_factor = 25
 
 ss = ShatteredSprite(conf)
@@ -194,4 +194,4 @@ def genSpriteMap(frames):
     quit()
 
 main()
-genSpriteMap(60)
+#genSpriteMap(60)
