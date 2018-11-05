@@ -62,6 +62,9 @@ TagManager:
   - name: Border
     uniqueID: 116157985
     locked: 0
+  - name: Super Slam Bar
+    uniqueID: 2082029451
+    locked: 0
   - name: UI
     uniqueID: 3722053399
     locked: 0

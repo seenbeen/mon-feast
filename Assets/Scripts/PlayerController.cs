@@ -8,6 +8,11 @@ public class PlayerController : MonoBehaviour {
     private CandyDestructor candyDestructor = null;
     [SerializeField]
     private GameObject ghostPlayerPrefab = null;
+    [SerializeField]
+    private SuperSlamBarScript slamBar = null;
+
+    [SerializeField]
+    private int slamBarMaxCounter = 10;
 
     public float maxVelx = 5.0f;
     public float maxVely = 5.0f;
@@ -15,8 +20,10 @@ public class PlayerController : MonoBehaviour {
     public float gAccel = 1.0f;
     public float max_height = 9.0f;
     public float slam_vel = 10.0f;
+        
+    private int slamBarCounter = 0;
 
-    public CandyScript.Colour colour = CandyScript.Colour.BLUE;
+    private CandyScript.Colour colour = CandyScript.Colour.BLUE;
 
     private Rigidbody2D rb;
     private Vector2 last_frame_vel;
@@ -108,13 +115,14 @@ public class PlayerController : MonoBehaviour {
             slam_state = SlamState.SLAMMING;
             cur_vel.y = -slam_vel;
             cur_vel.x = 0;
-        } else if (Input.GetKeyDown(KeyCode.UpArrow) && slam_state == SlamState.NOT_SLAMMING)
+        } else if (Input.GetKeyDown(KeyCode.UpArrow) && slam_state == SlamState.NOT_SLAMMING && slamBarCounter >= slamBarMaxCounter)
         {
             pac.Slam(true);
             pac.SetColour((int)CandyScript.Colour.WHITE + 1);
             slam_state = SlamState.SUPER_SLAMMING;
             cur_vel.y = -slam_vel * 2;
             cur_vel.x = 0;
+            slamBarCounter = 0;
         }
 
 
@@ -123,6 +131,9 @@ public class PlayerController : MonoBehaviour {
         rb.velocity = cur_vel;
 
         last_frame_vel = rb.velocity;
+
+        // update slam bar
+        slamBar.SetBarLevel(((float) slamBarCounter) / slamBarMaxCounter);
     }
 
     void HandleCandyBlockCollision(Collision2D col)
@@ -149,7 +160,11 @@ public class PlayerController : MonoBehaviour {
                 {
                     SetColour(colour);
                     int INF = 1000; // 10 * 10 = 100; 1000 is more than safe to be considered inf
-                    candyDestructor.DestructTile(col.collider.gameObject.GetComponent<CandyScript>(), INF, is_super_slam);
+                    int destroyed = candyDestructor.DestructTile(col.collider.gameObject.GetComponent<CandyScript>(), INF, is_super_slam);
+                    if (!is_super_slam)
+                    {
+                        slamBarCounter += destroyed;
+                    }
                 }
             }
         }

@@ -42,6 +42,7 @@ public class CandyDestructor : MonoBehaviour {
             case State.SUPER:
                 {
                     SuperExplodeTiles();
+                    destruct_timer = perChainBlockDestructionTime;
                     state = State.SETTLE;
                     break;
                 }
@@ -128,7 +129,7 @@ public class CandyDestructor : MonoBehaviour {
         }
 	}
     
-    public void DestructTile(CandyScript script, int count, bool is_super)
+    public int DestructTile(CandyScript script, int count, bool is_super)
     {
         switch (state)
         {
@@ -149,7 +150,11 @@ public class CandyDestructor : MonoBehaviour {
                     candyManager.Freeze();
                     candyGen.Freeze();
                     state = this.is_super ? State.SUPER : State.GLOW;
-                    break;
+                    return 1 + candyManager.BFS(new List<CandyScript> { script }, cc => cc.colour == script.colour, -1).Count;
+                }
+            default:
+                {
+                    return 0;
                 }
         }
     }
