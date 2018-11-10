@@ -2,9 +2,10 @@
 using System.Collections;
 using UnityEngine.SceneManagement;
 
-public class LoadSceneOnClick : MonoBehaviour
+public class LoadSceneOnEnable : MonoBehaviour
 {
-    public void LoadByIndex(int sceneIndex)
+    public int sceneIndex;
+    public void OnEnable()
     {
         Time.timeScale = 1; // Fix to unpause a game that left on game-over
         SceneManager.LoadScene(sceneIndex);

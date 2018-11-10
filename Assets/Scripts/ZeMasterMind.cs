@@ -46,6 +46,7 @@ public class ZeMasterMind : MonoBehaviour {
         difficulty_scalar = (expectedFinalPConstant - startingPConstant) / expectedDurationSeconds;
         rise_period_scalar = (endingRisePeriod - startingRisePeriod) / expectedDurationSeconds;
         falling_candy_scalar = (endingFallingGeneratorInterval - startingFallingGeneratorInterval) / expectedDurationSeconds;
+        SetGamePaused(true);
     }
 
 	void Update () {
@@ -71,7 +72,6 @@ public class ZeMasterMind : MonoBehaviour {
         {
             return;
         }
-
         isCurrentlyPaused = isPaused;
         
         if (isCurrentlyPaused)
@@ -87,8 +87,17 @@ public class ZeMasterMind : MonoBehaviour {
     {
         if (!hasFocus)
         {
-            pausePanel.SetActive(true);
-            SetGamePaused(true);
+            SetGamePausedWithScreen(true);
+        }  
+    }
+
+    public void SetGamePausedWithScreen(bool isPaused)
+    {
+        if (isCurrentlyPaused == isPaused)
+        {
+            return;
         }
+        pausePanel.SetActive(isPaused);
+        SetGamePaused(isPaused);
     }
 }

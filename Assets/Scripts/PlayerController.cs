@@ -74,6 +74,10 @@ public class PlayerController : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
+        if (Time.timeScale == 0)
+        {
+            return;
+        }
         if (currently_frozen)
         {
             rb.velocity = new Vector2();

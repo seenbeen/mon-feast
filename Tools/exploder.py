@@ -144,13 +144,13 @@ class ShatteredSprite:
 
 conf = ShatteredSprite.Config()
 conf.seed = "EXPLOOSIONNN!"
-conf.image = image.load("Green Candy.png")
+conf.image = image.load("Blue Candy.png")
 conf.image = transform.scale(conf.image, (conf.image.get_width(), conf.image.get_height()))
-conf.explode_scale = 3.0
-conf.r_spread_min = 0.1
-conf.r_spread_max = 0.2
-conf.wait_time = 1
-conf.explode_time = 2
+conf.explode_scale = 3
+conf.r_spread_min = 0.07
+conf.r_spread_max = 0.25
+conf.wait_time = 0.5
+conf.explode_time = 1.0
 conf.explode_factor = 25
 
 ss = ShatteredSprite(conf)
@@ -179,8 +179,8 @@ def main():
     quit()
 
 def genSpriteMap(frames):
-    w = int(math.sqrt(frames))
-    h = int(math.ceil(frames / float(w)))
+    w = frames#int(math.sqrt(frames))
+    h = 1#int(math.ceil(frames / float(w)))
     surf = Surface((ss.width * w, ss.height * h), SRCALPHA)
     center = (ss.width / 2, ss.height / 2)
     surf.fill((255,255,255,0))
@@ -194,4 +194,4 @@ def genSpriteMap(frames):
     quit()
 
 main()
-#genSpriteMap(60)
+#genSpriteMap(10)
