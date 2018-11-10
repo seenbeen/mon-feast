@@ -71,7 +71,7 @@ public class CandyManager : MonoBehaviour {
         spawn_counter = risePeriod * (riseRate - 1);
         for (int j = initRows - 1; j >= 0; --j)
         {
-            GenerateRow(j);
+            GenerateRow(j, 0);
         }
     }
 
@@ -207,7 +207,7 @@ public class CandyManager : MonoBehaviour {
             spawn_counter -= risePeriod * riseRate;
             for (int j = 0; j < riseRate; ++j)
             {
-                GenerateRow(-j);
+                GenerateRow(-j, spawn_counter);
             }
             risePeriod = new_rise_period;
             Vector2 new_vel = GetVerticalVelocityByTimePeriod(risePeriod * riseRate);
@@ -250,7 +250,7 @@ public class CandyManager : MonoBehaviour {
         }
     }
 
-    void GenerateRow(int row)
+    void GenerateRow(int row, float elapsedTimeInPeriod)
     {
         List<CandyScript> next_row = new List<CandyScript>();
         candy_grid.Add(next_row);
@@ -262,6 +262,7 @@ public class CandyManager : MonoBehaviour {
             CandyScript script = candy.GetComponent<CandyScript>();
             script.manager = this;
             candy.transform.position = GetGridPosition(row, i, next_row_parity);
+            candy.transform.position +=  (Vector3)script.GetRB().velocity * elapsedTimeInPeriod;
             script.GetRB().velocity = GetVerticalVelocityByTimePeriod(risePeriod * riseRate);
 
             next_row.Add(script);

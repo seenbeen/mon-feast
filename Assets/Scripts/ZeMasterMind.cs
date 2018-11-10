@@ -50,6 +50,10 @@ public class ZeMasterMind : MonoBehaviour {
     }
 
 	void Update () {
+        if (Input.GetKeyDown(KeyCode.P) || Input.GetKeyDown(KeyCode.Escape))
+        {
+            SetGamePausedWithScreen(!isCurrentlyPaused);
+        }
         if (!isCurrentlyPaused)
         {
 
