@@ -217,7 +217,7 @@ public class CandyManager : MonoBehaviour {
                 {
                     if (c != null)
                     {
-                        c.GetRB().velocity = new_vel;
+                        c.velocity = new_vel;
                     }
                 }
             }
@@ -262,8 +262,8 @@ public class CandyManager : MonoBehaviour {
             CandyScript script = candy.GetComponent<CandyScript>();
             script.manager = this;
             candy.transform.position = GetGridPosition(row, i, next_row_parity);
-            candy.transform.position +=  (Vector3)script.GetRB().velocity * elapsedTimeInPeriod;
-            script.GetRB().velocity = GetVerticalVelocityByTimePeriod(risePeriod * riseRate);
+            script.velocity = GetVerticalVelocityByTimePeriod(risePeriod * riseRate);
+            candy.transform.position += (Vector3)script.velocity * elapsedTimeInPeriod;
 
             next_row.Add(script);
             candy_indexer.Add(script, new CandyScriptIndex(row_index, i));

@@ -4484,6 +4484,11 @@ MonoBehaviour:
   player: {fileID: 1166129393}
   candyManager: {fileID: 605621334}
   candyGen: {fileID: 2003940658}
+  comboPrefab: {fileID: 1154005406187902, guid: 269a12bc92a965540994f50397dd7b64,
+    type: 2}
+  comboGoodCount: 4
+  comboGreatCount: 6
+  comboAwesomeCount: 10
   perChainBlockDestructionTime: 0.11
 --- !u!4 &1620390718
 Transform:
@@ -4869,7 +4874,7 @@ MonoBehaviour:
   generationProbability: 0.33
   generationXMin: 0.5
   generationXMax: 7.5
-  generationYPos: 12
+  generationYPos: 11.5
   generationXDistribution: 1
   generationYDistribution: 3
 --- !u!4 &2003940659
@@ -5291,9 +5296,9 @@ Camera:
   m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0.1996997
+    x: 0.22527471
     y: 0
-    width: 0.6006006
+    width: 0.5494506
     height: 1
   near clip plane: 0.3
   far clip plane: 1000

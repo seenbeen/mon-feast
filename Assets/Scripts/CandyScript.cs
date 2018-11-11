@@ -24,15 +24,14 @@ public class CandyScript : MonoBehaviour {
     // Pause-Related Fields
     private Vector2 freeze_frame_vel;
     private bool currently_frozen = false;
+    public Vector3 velocity = new Vector3();
 
     // Component refs
-    private Rigidbody2D rb = null;
     private Animator an = null;
     
     // Use this for initialization
     void Start () {
         Debug.Assert(manager != null); // safety check... only manager should be creating Candies...
-        GetRB();
         an = GetComponent<Animator>();
         an.Play(Animator.StringToHash("Red_Idle"));
         an.SetInteger("Colour", (int)colour);
@@ -59,8 +58,8 @@ public class CandyScript : MonoBehaviour {
     {
         if (!currently_frozen)
         {
-            freeze_frame_vel = rb.velocity;
-            rb.velocity = new Vector2();
+            freeze_frame_vel = velocity;
+            velocity = new Vector3();
             currently_frozen = true;
         }
         else
@@ -73,7 +72,7 @@ public class CandyScript : MonoBehaviour {
     {
         if (currently_frozen)
         {
-            rb.velocity = freeze_frame_vel;
+            velocity = freeze_frame_vel;
             currently_frozen = false;
         }
         else
@@ -81,20 +80,16 @@ public class CandyScript : MonoBehaviour {
             Debug.LogWarning("Unfreezing unfrozen candy.");
         }
     }
-
-    public Rigidbody2D GetRB()
-    {
-        if (rb == null)
-        {
-            rb = gameObject.GetComponent<Rigidbody2D>();
-        }
-        return rb;
-    }
     
     public void SpawnGhost()
     {
         GameObject ghost = Instantiate(ghostCandyPrefab);
         ghost.transform.position = transform.position;
         ghost.GetComponent<GhostCandyScript>().colour = colour;
+    }
+
+    public void Update()
+    {
+        transform.position += velocity * Time.deltaTime;
     }
 }

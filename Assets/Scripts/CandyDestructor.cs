@@ -14,6 +14,13 @@ public class CandyDestructor : MonoBehaviour {
     [SerializeField]
     FallingCandyGenerator candyGen = null;
 
+    [SerializeField]
+    GameObject comboPrefab = null;
+
+    public int comboGoodCount = 5;
+    public int comboGreatCount = 10;
+    public int comboAwesomeCount = 15;
+
     public float perChainBlockDestructionTime = 0.050f; // 50 mils by default
 
     State state = State.IDLE;
@@ -82,6 +89,7 @@ public class CandyDestructor : MonoBehaviour {
                         {
                             c.isDead = true;
                         }
+                        SpawnComboText(dedded.Count);
                         dedded.Clear();
                         state = State.SETTLE;
                     }
@@ -129,6 +137,28 @@ public class CandyDestructor : MonoBehaviour {
         }
 	}
     
+    void SpawnComboText(int destructCount)
+    {
+        if (destructCount < comboGoodCount)
+        {
+            return;
+        }
+        GameObject combo = Instantiate(comboPrefab);
+        
+        ComboScript.Type type;
+        if (destructCount >= comboAwesomeCount)
+        {
+            type = ComboScript.Type.AWESOME;
+        } else if (destructCount >= comboGreatCount)
+        {
+            type = ComboScript.Type.GREAT;
+        } else
+        {
+            type = ComboScript.Type.GOOD;
+        }
+        combo.GetComponent<ComboScript>().type = type;
+    }
+
     public int DestructTile(CandyScript script, int count, bool is_super)
     {
         switch (state)
@@ -171,6 +201,7 @@ public class CandyDestructor : MonoBehaviour {
             cc.isDead = true;
         }
         c.isDead = true;
+        SpawnComboText(flooded.Count + 1);
     }
 
     void GlowNextTiles()
