@@ -20,7 +20,13 @@ public class PlayerController : MonoBehaviour {
     public float gAccel = 1.0f;
     public float max_height = 9.0f;
     public float slam_vel = 10.0f;
-        
+
+    [SerializeField]
+    AudioClip superSlamClip = null;
+    [SerializeField]
+    AudioClip slamClip = null;
+    AudioSource audioSource = null;
+
     private int slamBarCounter = 0;
 
     private CandyScript.Colour colour = CandyScript.Colour.BLUE;
@@ -39,6 +45,7 @@ public class PlayerController : MonoBehaviour {
 
         rb = GetComponent<Rigidbody2D>();
         pac = GetComponent<PlayerAnimationController>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     void SetColour(CandyScript.Colour colour)
@@ -83,12 +90,7 @@ public class PlayerController : MonoBehaviour {
             rb.velocity = new Vector2();
             return;
         }
-        /* // TODO: get the angle stuff working ;_;
-        float ang = ((Mathf.Atan2(1.5f, rb.velocity.x / maxVelx) * Mathf.Rad2Deg) % 360 + 360) % 360 + 90;
-        Debug.Log(ang);
-        
-        transform.rotation = Quaternion.AngleAxis(180 - ang, new Vector3(0,0,1));
-        */
+
         Vector2 cur_vel = rb.velocity;
 
         if (cur_vel.y > 0)
@@ -115,12 +117,14 @@ public class PlayerController : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.DownArrow) && slam_state == SlamState.NOT_SLAMMING)
         {
+            audioSource.PlayOneShot(slamClip, 1.0f);
             pac.Slam(true);
             slam_state = SlamState.SLAMMING;
             cur_vel.y = -slam_vel;
             cur_vel.x = 0;
-        } else if (Input.GetKeyDown(KeyCode.UpArrow) && slam_state == SlamState.NOT_SLAMMING && slamBarCounter >= slamBarMaxCounter)
+        } else if ((Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space)) && slam_state == SlamState.NOT_SLAMMING && slamBarCounter >= slamBarMaxCounter)
         {
+            audioSource.PlayOneShot(superSlamClip, 1.0f);
             pac.Slam(true);
             pac.SetColour((int)CandyScript.Colour.WHITE + 1);
             slam_state = SlamState.SUPER_SLAMMING;

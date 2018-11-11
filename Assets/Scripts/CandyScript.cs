@@ -6,7 +6,10 @@ public class CandyScript : MonoBehaviour {
     // Structs and Enums
     public enum Colour { RED = 0, GREEN, BLUE, WHITE };
     public enum State { IDLE = 0, GLOW, EXPLODE };
-    
+
+    [SerializeField]
+    AudioClip settleInPlaceClip = null;
+
     // Candy-Specific Information
     [HideInInspector]
     public CandyManager manager = null;
@@ -21,20 +24,17 @@ public class CandyScript : MonoBehaviour {
 
     private State state = State.IDLE;
 
-    // Pause-Related Fields
-    private Vector2 freeze_frame_vel;
-    private bool currently_frozen = false;
-    public Vector3 velocity = new Vector3();
-
     // Component refs
     private Animator an = null;
-    
+    private AudioSource audioSource = null;
+
     // Use this for initialization
     void Start () {
         Debug.Assert(manager != null); // safety check... only manager should be creating Candies...
         an = GetComponent<Animator>();
         an.Play(Animator.StringToHash("Red_Idle"));
         an.SetInteger("Colour", (int)colour);
+        audioSource = GetComponent<AudioSource>();
     }
 
     public bool IsAnimComplete()
@@ -54,33 +54,6 @@ public class CandyScript : MonoBehaviour {
         return this.state;
     }
 
-    public void Freeze()
-    {
-        if (!currently_frozen)
-        {
-            freeze_frame_vel = velocity;
-            velocity = new Vector3();
-            currently_frozen = true;
-        }
-        else
-        {
-            Debug.LogWarning("Freezing frozen candy.");
-        }
-    }
-
-    public void Unfreeze()
-    {
-        if (currently_frozen)
-        {
-            velocity = freeze_frame_vel;
-            currently_frozen = false;
-        }
-        else
-        {
-            Debug.LogWarning("Unfreezing unfrozen candy.");
-        }
-    }
-    
     public void SpawnGhost()
     {
         GameObject ghost = Instantiate(ghostCandyPrefab);
@@ -88,8 +61,8 @@ public class CandyScript : MonoBehaviour {
         ghost.GetComponent<GhostCandyScript>().colour = colour;
     }
 
-    public void Update()
+    public void PlaySettleSound()
     {
-        transform.position += velocity * Time.deltaTime;
+        audioSource.PlayOneShot(settleInPlaceClip, 0.6f);
     }
 }

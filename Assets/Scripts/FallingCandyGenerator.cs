@@ -32,7 +32,7 @@ public class FallingCandyGenerator : MonoBehaviour {
         l_time = new float[generationXRange];
         for (int i = 0; i < generationXRange; ++i)
         {
-            l_time[i] = generationYDistributionTime;
+            l_time[i] = 0;
         }
     }
 

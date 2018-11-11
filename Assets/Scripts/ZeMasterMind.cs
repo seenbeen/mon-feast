@@ -7,13 +7,14 @@ public class ZeMasterMind : MonoBehaviour {
     // The master mind game-master which controls how difficult things are
     // at any given point in time and also referees the game
     [SerializeField]
+    private Muter muter = null;
+
+    [SerializeField]
     private GameObject pausePanel = null;
 
     [SerializeField]
     private GameObject gameOverPanel = null;
     
-    [SerializeField]
-    private PlayerController player = null;
     [SerializeField]
     private CandyManager candyManager = null;
     [SerializeField]
@@ -59,7 +60,9 @@ public class ZeMasterMind : MonoBehaviour {
 
             duration += Time.deltaTime;
             candyManager.chainLengthProbabilityDecay = Mathf.Max(startingPConstant + difficulty_scalar * duration, expectedFinalPConstant);
-            candyManager.SetRisePeriod(Mathf.Max(startingRisePeriod + rise_period_scalar * duration, endingRisePeriod));
+            float rp = Mathf.Max(startingRisePeriod + rise_period_scalar * duration, endingRisePeriod);
+            rp *= Modulator(candyManager.GetHighestHeight());
+            candyManager.SetRisePeriod(rp);
             candyGen.generationInterval = Mathf.Max(startingFallingGeneratorInterval + falling_candy_scalar * duration, endingFallingGeneratorInterval);
             // tint screen
             if (candyManager.GetHighestHeight() >= deathHeight)
@@ -70,6 +73,22 @@ public class ZeMasterMind : MonoBehaviour {
         }
     }
 
+    float Modulator(float h)
+    {
+        float modulation;
+        if (h <= 4)
+        {
+            modulation = 0.25f;
+        } else if (h <= 8)
+        {
+            modulation = 1.0f;
+        } else
+        {
+            modulation = 2.0f;
+        }
+        return modulation;
+    }
+
     public void SetGamePaused(bool isPaused)
     {
         if (isCurrentlyPaused == isPaused)
@@ -77,7 +96,7 @@ public class ZeMasterMind : MonoBehaviour {
             return;
         }
         isCurrentlyPaused = isPaused;
-        
+        muter.isPaused = isCurrentlyPaused;
         if (isCurrentlyPaused)
         {
             Time.timeScale = 0;

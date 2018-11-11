@@ -126,21 +126,25 @@ public class CandyManager : MonoBehaviour {
         return new Vector2(0.0f, actualRadius / period);
     }
 
-    public float GetHighestHeight()
+    public float GetHighestTrueHeight()
     {
-        float vStack = PolyPieceGenerator.CalculateVStackDistance(6, mainRadius);
-        float aRad = PolyPieceGenerator.CalculateActualRadius(6, mainRadius);
         foreach (List<CandyScript> l in candy_grid)
         {
             foreach (CandyScript c in l)
             {
                 if (c != null)
                 {
-                    return (c.gameObject.transform.position.y + aRad) / vStack;
+                    return c.gameObject.transform.position.y;
                 }
             }
         }
         return 0;
+    }
+    public float GetHighestHeight()
+    {
+        float vStack = PolyPieceGenerator.CalculateVStackDistance(6, mainRadius);
+        float aRad = PolyPieceGenerator.CalculateActualRadius(6, mainRadius);
+        return (GetHighestTrueHeight() + aRad) / vStack;
     }
 
     public void SetRisePeriod(float period)
@@ -152,16 +156,6 @@ public class CandyManager : MonoBehaviour {
     {
         if (!currently_frozen)
         {
-            foreach (List<CandyScript> l in candy_grid)
-            {
-                foreach (CandyScript c in l)
-                {
-                    if (c != null)
-                    {
-                        c.Freeze();
-                    }
-                }
-            }
             currently_frozen = true;
         }
         else
@@ -174,16 +168,6 @@ public class CandyManager : MonoBehaviour {
     {
         if (currently_frozen)
         {
-            foreach (List<CandyScript> l in candy_grid)
-            {
-                foreach (CandyScript c in l)
-                {
-                    if (c != null)
-                    {
-                        c.Unfreeze();
-                    }
-                }
-            }
             currently_frozen = false;
         }
         else
@@ -201,7 +185,20 @@ public class CandyManager : MonoBehaviour {
             return;
         }
 
+        Vector2 new_vel = GetVerticalVelocityByTimePeriod(risePeriod * riseRate);
+        foreach (List<CandyScript> l in candy_grid)
+        {
+            foreach (CandyScript c in l)
+            {
+                if (c != null)
+                {
+                    c.transform.position += (Vector3)new_vel * Time.deltaTime;
+                }
+            }
+        }
+
         spawn_counter += Time.deltaTime;
+
         if (spawn_counter >= risePeriod * riseRate)
         {
             spawn_counter -= risePeriod * riseRate;
@@ -209,17 +206,9 @@ public class CandyManager : MonoBehaviour {
             {
                 GenerateRow(-j, spawn_counter);
             }
-            risePeriod = new_rise_period;
-            Vector2 new_vel = GetVerticalVelocityByTimePeriod(risePeriod * riseRate);
-            foreach (List<CandyScript> l in candy_grid)
+            if (risePeriod != new_rise_period)
             {
-                foreach (CandyScript c in l)
-                {
-                    if (c != null)
-                    {
-                        c.velocity = new_vel;
-                    }
-                }
+                risePeriod = new_rise_period;
             }
         }
     }
@@ -262,8 +251,8 @@ public class CandyManager : MonoBehaviour {
             CandyScript script = candy.GetComponent<CandyScript>();
             script.manager = this;
             candy.transform.position = GetGridPosition(row, i, next_row_parity);
-            script.velocity = GetVerticalVelocityByTimePeriod(risePeriod * riseRate);
-            candy.transform.position += (Vector3)script.velocity * elapsedTimeInPeriod;
+            Vector3 velocity = GetVerticalVelocityByTimePeriod(risePeriod * riseRate);
+            candy.transform.position += velocity * elapsedTimeInPeriod;
 
             next_row.Add(script);
             candy_indexer.Add(script, new CandyScriptIndex(row_index, i));

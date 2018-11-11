@@ -17,6 +17,9 @@ public class CandyDestructor : MonoBehaviour {
     [SerializeField]
     GameObject comboPrefab = null;
 
+    [SerializeField]
+    AudioClip comboClip = null;
+
     public int comboGoodCount = 5;
     public int comboGreatCount = 10;
     public int comboAwesomeCount = 15;
@@ -33,9 +36,11 @@ public class CandyDestructor : MonoBehaviour {
 
     HashSet<CandyScript> settled_candies = new HashSet<CandyScript>();
 
+    AudioSource audioSource = null;
+
     // Use this for initialization
     void Start () {
-		
+        audioSource = GetComponent<AudioSource>();	
 	}
 
 	// Update is called once per frame
@@ -106,6 +111,7 @@ public class CandyDestructor : MonoBehaviour {
                             state = State.SUPER_CHAIN;
                             break;
                         }
+                        settled.PlaySettleSound();
                         settled_candies.Add(settled);
                         destruct_timer += perChainBlockDestructionTime;
                     }
@@ -149,14 +155,18 @@ public class CandyDestructor : MonoBehaviour {
         if (destructCount >= comboAwesomeCount)
         {
             type = ComboScript.Type.AWESOME;
+            audioSource.PlayOneShot(comboClip, 3.0f);
         } else if (destructCount >= comboGreatCount)
         {
+            audioSource.PlayOneShot(comboClip, 2.5f);
             type = ComboScript.Type.GREAT;
         } else
         {
+            audioSource.PlayOneShot(comboClip, 1.75f);
             type = ComboScript.Type.GOOD;
         }
         combo.GetComponent<ComboScript>().type = type;
+        
     }
 
     public int DestructTile(CandyScript script, int count, bool is_super)
